@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>刮刮乐ScratchCard</title>
+</head>
+
+<body>
+    <div id="wrapper" style="width:300px;height:240px;background:url(企鹅.jpg) no-repeat;margin:100px auto;border: 1px solid #c00;"></div>
+
+
+
+    <script type="text/javascript">
+    init();
+    function init(){
+    	if(!document.getElementById("mycanvas")){
+    		var width = "";
+    		var height = "";
+
+    		var mycanvas = document.createElement("canvas");
+
+    		width = document.getElementById("wrapper").offsetWidth;
+    		height = document.getElementById("wrapper").offsetHeight;
+
+    		mycanvas.setAttribute("width", width+"px");
+    		mycanvas.setAttribute("height", height+"px");
+    		mycanvas.setAttribute("style", "border:1px solid #ff6");
+    		mycanvas.id  = "mycanvas";
+
+    		document.getElementById("wrapper").appendChild(mycanvas);
+    	}
+
+    	var mycanvasObj = document.getElementById("mycanvas");
+    	var contxt = mycanvasObj.getContext("2d");
+
+    	contxt.beginPath();
+    	contxt.fillStyle = "#c0c0c0";
+    	contxt.rect(0, 0, width, height);
+    	contxt.closePath();
+    	contxt.fill();
+
+    	var isDown = false;
+    	var pointerArr = [];
+    	var xPointer = 0;
+    	var yPointer = 0;
+
+
+    }
+    </script>
+</body>
+
+</html>
