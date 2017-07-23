@@ -8,45 +8,110 @@
 
 <body>
     <div id="wrapper" style="width:300px;height:240px;background:url(企鹅.jpg) no-repeat;margin:100px auto;border: 1px solid #c00;"></div>
-
-
-
     <script type="text/javascript">
+    var pointerArr = [];//鼠标移动坐标数组
     init();
-    function init(){
-    	if(!document.getElementById("mycanvas")){
-    		var width = "";
-    		var height = "";
 
-    		var mycanvas = document.createElement("canvas");
+    function init() {
+        if (!document.getElementById("mycanvas")) {
+            var width = "";
+            var height = "";
 
-    		width = document.getElementById("wrapper").offsetWidth;
-    		height = document.getElementById("wrapper").offsetHeight;
+            var mycanvas = document.createElement("canvas");
 
-    		mycanvas.setAttribute("width", width+"px");
-    		mycanvas.setAttribute("height", height+"px");
-    		mycanvas.setAttribute("style", "border:1px solid #ff6");
-    		mycanvas.id  = "mycanvas";
+            width = document.getElementById("wrapper").offsetWidth;
+            height = document.getElementById("wrapper").offsetHeight;
 
-    		document.getElementById("wrapper").appendChild(mycanvas);
-    	}
+            mycanvas.setAttribute("width", width + "px");
+            mycanvas.setAttribute("height", height + "px");
+            mycanvas.setAttribute("style", "border:1px solid #ff6");
+            mycanvas.id = "mycanvas";
 
-    	var mycanvasObj = document.getElementById("mycanvas");
-    	var contxt = mycanvasObj.getContext("2d");
+            document.getElementById("wrapper").appendChild(mycanvas);
+        }
 
-    	contxt.beginPath();
-    	contxt.fillStyle = "#c0c0c0";
-    	contxt.rect(0, 0, width, height);
-    	contxt.closePath();
-    	contxt.fill();
+        var mycanvasObj = document.getElementById("mycanvas");
+        var contxt = mycanvasObj.getContext("2d");
 
-    	var isDown = false;
-    	var pointerArr = [];
-    	var xPointer = 0;
-    	var yPointer = 0;
+        //绘制黑色矩形
+        contxt.beginPath();
+        contxt.fillStyle = "#c0c0c0";
+        contxt.rect(0, 0, width, height);
+        contxt.closePath();
+        contxt.fill();
 
+        var isDown = false;//鼠标是否按下标
+
+        var xPointer = 0;//鼠标当前x坐标
+        var yPointer = 0;//鼠标当前y坐标
+
+        // in关键词可以检查对象里是否有某个属性
+        // 有ontouchstart说明是移动设备，否则是PC
+        // pc，移动事件兼容写法
+        var hastouch = "ontouchstart" in window ? true : false,
+            tapstart = hastouch ? "touchstart" : "mousedown",
+            tapmove = hastouch ? "touchmove" : "mousemove",
+            tapend = hastouch ? "touchend" : "mouseup";
+
+        //鼠标按下
+        mycanvasObj.addEventListener(tapstart, function(event) {
+            this.style.cursor = "move";
+            isDown = true;
+
+            xPointer = hastouch ? event.targetTouches[0].pageX : event.clientX - this.offsetLeft;
+            yPointer = hastouch ? event.targetTouches[0].pageY : event.clientY - this.offsetTop;
+            pointerArr.push([xPointer, yPointer]);
+
+            circleReset(contxt);
+            console.log(yPointer);
+        });
+
+
+        //鼠标按下后拖动
+        mycanvasObj.addEventListener(tapmove, function(event) {
+            if (isDown) {
+                xPointer = hastouch ? event.targetTouches[0].pageX : event.clientX - this.offsetLeft;
+                yPointer = hastouch ? event.targetTouches[0].pageY : event.clientY - this.offsetTop;
+
+                pointerArr.push([xPointer, yPointer]);
+                circleReset(contxt);
+            }
+        });
+
+        //鼠标抬起取消事件
+        mycanvasObj.addEventListener(tapend, function(event) {
+            isDown = false;
+            pointerArr = [];
+        });
 
     }
+
+
+    //圆形橡皮檫
+    function circleReset(contxt) {
+    	// 把当前状态的一份拷贝压入到一个保存图像状态的栈中。这就允许您临时地改变图像状态，然后，通过调用 restore() 来恢复以前的值。
+        contxt.save();
+        contxt.beginPath();//开始一个画布中的一条新路径
+        contxt.moveTo(pointerArr[0][0], pointerArr[0][1]);
+        contxt.lineCap = "round";//指定线段的末端如何绘制 设置线条两端为圆弧
+        contxt.lineJoin = "round";//指定两条线条如何连接 设置线条转折为圆弧
+        contxt.lineWidth = 60;//指定两条线条如何连接
+        // 说明如何在画布上组合颜色,destination-out:在已有内容和新图形不重叠的地方，已有内容保留。所有其他内容成为透明。
+        contxt.globalCompositeOperation = "destination-out";
+        if (pointerArr.length == 1) {
+            contxt.lineTo(pointerArr[0][0] + 1, pointerArr[0][1] + 1);
+        } else {
+            for (var i = 1; i < pointerArr.length; i++) {
+            	//为当前子路径添加一条直线。这条直线从当前点开始，到 (x, y) 结束。当方法返回时，当前点是 (x,y)。
+                contxt.lineTo(pointerArr[i][0], pointerArr[i][1]);
+                // 将当前位置设置为 (x, y) 并用它作为第一点创建一条新的子路径。如果之前有一条子路径并且它包含刚才的那一点，那么从路径中删除该子路径。
+                contxt.moveTo(pointerArr[i][0], pointerArr[i][1]);
+            }
+        }
+        contxt.closePath();//如果当前子路径是打开的，就关闭它
+        contxt.stroke();//绘制当前路径的边框
+        contxt.restore(); //为画布重置为最近保存的图像状态
+        }
     </script>
 </body>
 
